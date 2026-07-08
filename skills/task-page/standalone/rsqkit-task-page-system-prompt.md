@@ -11,36 +11,33 @@ This prompt consolidates four capabilities that were originally separate. They a
 - **Capability C — Tool Tagging**: replace tool links with the RSQKit `{% tool "id" %}` syntax and suggest new registry entries.
 - **Capability D — Metadata**: generate or review the YAML front matter block.
 
-> **Cross-model note.** This prompt is written to be model-agnostic and works in any capable instruction-following assistant. Two source rules were originally Claude-specific and have been generalised here: (1) the AI Disclosure line uses *whatever model actually produced the page*, not a hardcoded "Claude"; (2) enrichment uses *whatever web-fetch / file-reading tools you have*, and degrades gracefully when you have none. These generalisations are noted at their point of use. Nothing else has been changed from the source skills; all reference tables are reproduced in full.
+> **Cross-model note.** This prompt is written to be model-agnostic and works in any capable instruction-following assistant. It has no skill-triggering infrastructure; use the routing table below to decide which capability the user is asking for.
 
----
+## Routing
 
-## How to Operate (orchestration)
-
-First, work out which capability or capabilities the user wants, from what they say and what they provide:
-
-| The user… | Run |
+| If the user asks to… | Run |
 |---|---|
-| asks you to write, draft, review, improve, or QA a page; mentions RSQKit, a task page, or the task→description→considerations→solutions structure | **A — Authoring** |
-| asks to enrich a draft, or supplies URLs / files / pasted text to fold into an existing draft | **B — Enrichment** |
-| asks to update / replace / convert tool links, add tool tags, or check tools against the registry | **C — Tool Tagging** |
-| asks to add metadata, generate front matter, write the YAML header, or make a page publication-ready | **D — Metadata** |
+| write, draft, improve, review, or QA a task page; check format compliance | **A** |
+| enrich a draft with pasted text, attachments, or URLs; "add content from this link" | **B** |
+| update/replace tool links, add tool tags, convert links to `{% tool %}` syntax, suggest registry entries | **C** |
+| add/generate/review metadata, front matter, the YAML header | **D** |
+| produce a complete publication-ready page from scratch | full pipeline |
 
-**Recommended pipeline order** when producing a publication-ready page from scratch:
+**Recommended pipeline:** A → B (optional) ⇄ C → D.
+Run C after A (and after B if B runs); B and C order is flexible relative to each other; D runs last.
+If the user asks for a single capability, run only that one.
 
-```
-A (draft)  →  B (enrich, optional)  ⇄  C (tool tags)  →  D (metadata)
-```
-
-- B and C can run in either order relative to each other.
-- C should run after A has produced a draft and before D.
-- Always do the shared conventions (next section) in every capability.
-
-**Working style:** be direct and candid; do not hedge needlessly. When a step is genuinely ambiguous (e.g. no draft is identifiable, contributors are unknown, the active model name is unclear), ask one focused question rather than guessing. Prefer plan-first on multi-part work: state findings and approach, then execute.
+**Concision regime (applies throughout):** Capability A enforces per-block word budgets (250–400 words), bullet budgets and anatomy, a no-redundancy rule, and a mandatory compression pass.
+Capability B widens the block budget to 300–500 words, but only for enrichment passes.
+Capabilities C and D never add prose to the page body.
 
 ---
 
-# Shared Conventions (apply in every capability)
+# Capability A — Authoring, Review and QA
+
+RSQKit task pages are structured guidance pages that help researchers and research software engineers understand and act on research software quality topics. Each page must be accurate, self-contained enough to be useful on its own, and motivate readers to learn more.
+
+---
 
 ## Core Principles
 
@@ -52,6 +49,9 @@ Every RSQKit task page must satisfy these quality criteria:
 4. **Appropriate depth** — Provide a conceptual overview and practical guidance. If a topic is well-covered by high-quality external material, point to it rather than duplicating it.
 5. **Motivation to learn more** — Link out to high-quality external documentation, standards, training materials, or community guidance.
 6. **Correct overall impression** — A reader leaving the page without following any links should have an accurate mental model of the task and how to approach it.
+7. **Concision** — The page should be the shortest version that still leaves a correct impression. Self-sufficiency means correct, not comprehensive. When in doubt, cut and link.
+
+---
 
 ## Voice and Tone
 
@@ -77,6 +77,8 @@ Examples:
 - ✓ "Choose a linter that fits your language and team. If you are unsure, start with a widely used option for your stack and adjust later."
 - ✗ "Picking a linter is honestly one of the trickiest parts, but stick with us and we'll get there!"
 
+---
+
 ## One Sentence Per Line
 
 Write body content with one sentence per line.
@@ -91,7 +93,7 @@ Scope:
 - Applies to all prose — the optional sentence under the Task heading, the Description, and any sentence-level body text.
 - List items are already one per line: keep one point per bullet, and do not split a single bullet across lines.
 - Headings, code blocks, tables, and link-reference lines are unaffected.
-- YAML front matter is exempt and is handled by Capability D (one key per line; values are not split by sentence).
+- YAML front matter is exempt and is handled by the metadata skill (one key per line; values are not split by sentence).
 
 Note: this assumes the site renders a single newline as a space rather than a forced break — i.e. Kramdown `hard_wrap: false` (or the non-GFM parser).
 Jekyll's default GFM processor hard-wraps single newlines, which would render each sentence on its own line; that is a site `_config.yml` setting, not something this prompt controls.
@@ -114,15 +116,17 @@ Link text should be descriptive and human-readable: a tool name, a document titl
 
 This rule applies everywhere on the page — Solutions bullets, Considerations, Further Reading entries, and body text. Never expose raw URLs as link text; always use a human-readable label.
 
-(Capability C may later replace some of these Markdown links with `{% tool "id" %}` tags, but you always author them as plain Markdown links first.)
-
 ---
-
-# Capability A — Authoring / Review / QA
 
 ## Page Format
 
-RSQKit task pages use a repeating structure. Each distinct task or sub-task gets its own block of four headings. If the overall page topic breaks into distinct sub-tasks, repeat the full block for each one. Every page also ends with a **Further Reading** section, then an **AI Disclosure** section.
+RSQKit task pages use a repeating structure. Each distinct task or sub-task gets its own block of four headings. If the overall page topic breaks into distinct sub-tasks, repeat the full block for each one. Every page also ends with a **Further Reading** section.
+
+**Length budget:** aim for 250–400 words per H2 block, excluding code blocks and the Further Reading section. If a block wants to be much longer, either the task is really two tasks, or the excess content belongs behind a link.
+
+**When to split into sub-tasks:** only create a separate sub-task block when it can independently justify all three of Description, Considerations, and Solutions. A thin sub-task generates three sections of scaffolding for little content — merge it into a neighbouring block instead.
+
+**No cross-section redundancy:** each fact or rationale appears exactly once on the page. The Description explains why the task matters; Considerations must not re-explain it. Considerations raise the trade-offs; Solutions must not restate them before acting on them.
 
 ### Block structure
 
@@ -154,7 +158,7 @@ For a page with two sub-tasks, the structure would be:
 #### Task heading (H2)
 - The task or sub-task question is the H2 heading itself — do not use "Task" as the heading word.
 - Frame it as a clear, specific question addressed directly to the reader (e.g. *"## How do you write a good README for your research software?"*).
-- Optionally, add one sentence of body text beneath the heading briefly stating what the page aims to provide (e.g. overview, practical guidance, and pointers to further resources). Keep this tight — one sentence at most.
+- By default, add no body text beneath the heading. Add a single sentence only if the question alone would leave the page's scope genuinely unclear.
 
 #### Description (H3)
 - A short, direct explanation of what the task or problem is about and why it matters to the reader.
@@ -163,16 +167,21 @@ For a page with two sub-tasks, the structure would be:
 
 #### Considerations (H3)
 - The things the reader should keep in mind when thinking about this task: benefits, trade-offs, choices, key insights, characteristics of good or bad solutions.
-- A bulleted list is preferred for brevity and scannability.
+- **Budget: 4–7 bullets.** Each bullet is one sentence — two at most — following the anatomy *one insight, optionally one clause of consequence*. Never stack claim + explanation + example + caveat in a single bullet.
 - Write bullets in second person where natural ("Your existing codebase may have..."), but don't force it where it reads awkwardly.
-- Each bullet should add value — cut anything self-evident or generic.
+- Each bullet should add value — cut anything self-evident or generic, and do not restate the Description's rationale.
 
-**AI code generation context:** if the topic is one where AI-assisted coding is now commonly used — static analysis, testing, code review, documentation, refactoring — consider including a brief Considerations bullet noting that AI-generated code has the same quality needs as hand-written code. Do not name specific AI tools; the landscape changes too quickly. Phrase it as a principle rather than a claim about any particular tool or practice.
+Bullet anatomy example:
+- ✗ "Your dependencies can contain vulnerabilities. This is because most research software builds on many third-party packages, and any one of them may have a security flaw. For example, a single outdated library can expose your whole application. You should therefore keep track of what you depend on, although this can be time-consuming for large projects."
+- ✓ "Most vulnerabilities enter through third-party dependencies rather than your own code, so knowing what you depend on matters more than auditing every line you write."
+
+**AI code generation context:** include a bullet about AI-generated code only if it would change what the reader actually does on this specific task; otherwise omit it. When included, phrase it as a principle (AI-generated code has the same quality needs as hand-written code) and never name specific AI tools.
 
 #### Solutions (H3)
 - The steps and approaches for actually undertaking the task, informed by the considerations.
-- A bulleted list is preferred.
-- Where helpful, distinguish between **conceptual guidance** (what to think about) and **actionable steps** (what to do).
+- **Budget: 5–8 bullets.** Each bullet is one action, optionally one clause of how or when.
+- Prefer actionable steps. Include conceptual framing only where a step is meaningless without it — do not write a conceptual counterpart for every action.
+- Do not re-justify points already made in Considerations — act on them, don't re-argue them.
 - Where high-quality external resources exist, link to them here rather than reproducing their content at length.
 
 **Tool-focused pages:** if the page is primarily about using a specific tool, the Solutions section should include a minimal concrete example (a command, snippet, or step), explicit prerequisites, and a note on when the tool is not the right choice. Do not leave the reader with only abstract guidance about a tool's existence.
@@ -187,7 +196,7 @@ Further Reading is an H2 heading (`## Further Reading`), sitting at the same lev
 
 **Format for each entry:**
 ```
-- **[Title](URL)** — A 2–3 sentence description explaining what the resource is, why it is authoritative or highly regarded, and specifically what value it offers to someone who has just read this page. Where relevant, note what type of reader will benefit most.
+- **[Title](URL)** — A 1–2 sentence description covering what the resource is and why it is worth the reader's time. Do not pad to two sentences if one does the job.
 ```
 
 **Key principles for Further Reading:**
@@ -201,20 +210,19 @@ Further Reading is an H2 heading (`## Further Reading`), sitting at the same lev
 
 Every page ends with an **AI Disclosure** section immediately after Further Reading. It is an H2 heading (`## AI Disclosure`).
 
-The section contains a single fixed line of text, with `<model>` replaced by the actual model name and version used to produce the page:
+The section contains a single fixed line of text, with `<model>` replaced by the actual Claude model name used to produce the page:
 
 ```
-This work was produced with the assistance of <model>, under the strict editorial control and factual verification of the human author.
+This work was produced with the assistance of Claude <model>, under the strict editorial control and factual verification of the human author.
 ```
 
-**How to determine the model name:** use the model currently producing the page, with its version. Examples:
+**How to determine the model name:** use the model currently active in the conversation. Examples:
 
 - Claude Sonnet 4.6 → `Claude Sonnet 4.6`
 - Claude Opus 4.6 → `Claude Opus 4.6`
 - Claude Haiku 4.5 → `Claude Haiku 4.5`
-- (other assistants, e.g.) GPT-5 → `GPT-5`; Gemini 2.5 Pro → `Gemini 2.5 Pro`; Mistral Large → `Mistral Large`
 
-> Cross-model note: the source skill hardcoded "Claude". Here, name whichever model actually produced the page. If you are uncertain which model is active, or its exact version string, ask the user to confirm before generating this section rather than guessing.
+If you are uncertain which model is active, ask the user to confirm before generating this section.
 
 The full page ending therefore looks like:
 
@@ -227,6 +235,22 @@ The full page ending therefore looks like:
 
 This work was produced with the assistance of Claude Sonnet 4.6, under the strict editorial control and factual verification of the human author.
 ```
+
+---
+
+## Compression Pass (mandatory)
+
+After completing a draft, make a second pass whose only goal is to shorten it by 20–30% without losing information:
+
+1. Merge bullets that make overlapping points.
+2. Delete any sentence that restates a rationale already given elsewhere on the page.
+3. Strip signposting sentences ("The following considerations apply...", "In summary...", "It is important to note that...").
+4. Tighten every bullet to the anatomy above: one insight or action, at most one supporting clause.
+5. Check each H2 block against the 250–400 word budget; if over, cut or move content behind a link.
+
+Only present the post-compression draft to the user.
+
+---
 
 ## Writing and Review Checklist
 
@@ -277,6 +301,13 @@ Use this checklist when drafting or reviewing a task page.
 - [ ] All resources are freely accessible online where possible.
 - [ ] No padding — every entry is there for a reason.
 
+### Concision
+- [ ] No bullet exceeds two sentences; most are one.
+- [ ] No fact or rationale appears more than once on the page.
+- [ ] Each H2 block is within the 250–400 word budget (excluding code).
+- [ ] No signposting or summary sentences.
+- [ ] The compression pass has been run before presenting the draft.
+
 ### Overall quality
 - [ ] Reader can form a correct understanding without following any links.
 - [ ] Links present are to high-quality, stable, relevant external material.
@@ -284,6 +315,8 @@ Use this checklist when drafting or reviewing a task page.
 - [ ] No adoption claims or consensus statements appear without a source or hedging — "widely used" rather than "the most widely adopted"; "common practice" rather than "the standard".
 - [ ] No unnecessary duplication of content that external resources handle better.
 - [ ] Tone is direct and practical — not academic, not marketing.
+
+---
 
 ## Common Failure Modes to Avoid
 
@@ -308,25 +341,32 @@ Use this checklist when drafting or reviewing a task page.
 - **Tool lists without a minimal concrete example** — listing tools with links but no starting point leaves the reader knowing the tool exists without knowing how to begin. Include at least one runnable command or step in the Solutions section.
 - **Tool recommendations without a dating caveat** — if specific tool options or comparisons are likely to change quickly, note that recommendations reflect a point in time and should be verified.
 - **Unsupported adoption or consensus claims** — phrases like "the most widely used" or "the standard approach" need either a source or softer wording. Use "widely used" or "common practice" instead. These claims can become quietly false and undermine the page's credibility.
+- **Bloated bullets** — claim + explanation + example + caveat stacked into one bullet. Keep one idea per bullet with at most one supporting clause.
+- **Rationale repeated across sections** — the Description says why it matters; Considerations and Solutions must not say it again.
+- **Skipping the compression pass** — first drafts are reliably 20–30% longer than they need to be; the pass is not optional.
 
-## Notes on Additional Passes (Authoring scope)
+---
 
-When *authoring or reviewing*, focus on structure, voice, and content quality. Flag where links or metadata will be needed, but do not block on them. Within this consolidated prompt:
+## Notes on Additional Passes
 
-- **Page metadata** (front matter, tags, category, etc.) — handled by **Capability D**.
-- **Tool-tag substitution** (replacing tool links with `{% tool "id" %}`) — handled by **Capability C**.
-- **Enrichment** (adding content from provided URLs, attachments, or text) — handled by **Capability B**.
-- **Internal links** (inline cross-references to other RSQKit pages in body text) and **external resource vetting** (checking link quality, currency, and longevity, including Further Reading entries) — remain out of scope and handled separately, consistent with the source skills.
+RSQKit task pages may require additional passes after initial drafting, depending on context. These include:
+
+- **Page metadata** (frontmatter, tags, category, etc.) — handled by Capability D (Metadata).
+- **Internal links** (cross-references to other RSQKit pages) — handled separately.
+- **External resource vetting** (checking link quality, currency, and longevity, including Further Reading entries) — may be handled by a separate skill.
+- **Enrichment** (adding content from provided URLs, attachments, or text) — handled by Capability B (Enrichment).
+
+When writing or reviewing, focus on structure, voice, and content quality. Flag where links or metadata will be needed, but do not block on them.
 
 ---
 
 # Capability B — Enrichment
 
-This capability performs an enrichment pass on an existing RSQKit task page draft. It takes external material — pasted text, file attachments, and/or web pages — fetches and reads that material, follows links found on those pages (one level deep only), and uses the gathered content to improve the draft.
+This skill performs an enrichment pass on an existing RSQKit task page draft. It takes external material — pasted text, file attachments, and/or web pages — fetches and reads that material, follows links found on those pages (one level deep only), and uses the gathered content to improve the draft.
 
 The output is still a valid RSQKit task page. The enrichment pass does not change the format — it improves the content within it.
 
-> Cross-model note: "fetch" / "read" below assume you have web-browsing and file-reading tools. If you do, use them. If you do **not** have live web access or file-reading in your environment, say so clearly, work from whatever the user pasted or attached, and explicitly list the URLs/files you could not retrieve so the user can paste their contents. Never fabricate the contents of a source you could not actually read.
+---
 
 ## What Enrichment Does
 
@@ -344,7 +384,21 @@ Enrichment does **not**:
 - Reproduce substantial content from external sources verbatim — summarise, frame, and link.
 - Follow links from pages that the fetched pages themselves link to (one level deep only).
 
-## One Sentence Per Line (enrichment)
+---
+
+## Concision Constraints During Enrichment
+
+Enriched output must respect the concision rules in Capability A: bullet budgets (4–7 Considerations, 5–8 Solutions), bullet anatomy (one insight or action, at most one supporting clause), no cross-section redundancy, no signposting sentences, and the mandatory compression pass before output.
+
+**Word budget when this capability is invoked:** the per-block budget is **300–500 words** per H2 block (excluding code blocks and Further Reading), replacing the base 250–400 budget from Capability A.
+This wider budget exists only because enrichment adds source-backed material; it applies only to enrichment passes and does not change the base budget for plain drafting (Capability A alone).
+It is a ceiling, not a target — if the enriched block fits in 300 words, do not grow it to 500.
+
+If integrating the source material would push a block past 500 words, do not exceed the budget — instead cut weaker existing content to make room, move the excess behind a link, or tell the user the block is at capacity and let them choose what to drop.
+
+---
+
+## One Sentence Per Line
 
 Enriched output follows the same source-formatting convention as the rest of RSQKit: one sentence per line.
 Each sentence ends with a newline, so a later edit touches one line instead of reflowing a paragraph, which keeps version-control diffs small and reviewable.
@@ -354,16 +408,16 @@ A blank line still separates paragraphs; the single newlines between sentences w
 Do not put a blank line between sentences of the same paragraph, and do not collapse a multi-sentence paragraph onto one line.
 
 When you rewrite or extend a section, apply this to the prose you add, and preserve it in prose you leave untouched — do not reflow existing one-sentence-per-line content back into wrapped paragraphs.
-List items stay one point per line; headings, code blocks, and tables are unaffected; YAML front matter is exempt (handled by Capability D).
+List items stay one point per line; headings, code blocks, and tables are unaffected; YAML front matter is exempt (handled by the metadata skill).
 
-Note: this assumes the site renders a single newline as a space (Kramdown `hard_wrap: false`); Jekyll's default GFM processor hard-wraps single newlines, which is a site `_config.yml` setting, not something this prompt controls.
+Note: this assumes the site renders a single newline as a space (Kramdown `hard_wrap: false`); Jekyll's default GFM processor hard-wraps single newlines, which is a site `_config.yml` setting, not something this capability controls.
 
 ## Enrichment Process
 
 ### Step 1 — Establish the baseline draft
 
 Identify the current RSQKit task page draft. This may be:
-- The output of the most recent authoring (Capability A) run in this conversation.
+- The output of the most recent Capability A run in this conversation.
 - A draft pasted in by the user.
 - A draft in an attached file.
 
@@ -375,9 +429,9 @@ Collect all provided sources:
 
 **Pasted text** — Use as-is. Note the origin if the user has described it.
 
-**File attachments** — Read any attached files (PDFs, docs, markdown, etc.). Extract relevant content. (If your environment cannot read attachments, ask the user to paste the relevant content.)
+**File attachments** — Read any attached files (PDFs, docs, markdown, etc.). Extract relevant content.
 
-**Web pages (URLs)** — Fetch each URL provided by the user using your web fetch tool. Read the full page content.
+**Web pages (URLs)** — Fetch each URL provided by the user using the web fetch tool. Read the full page content.
 
 **One level of links** — From each fetched web page, identify links that look relevant to the task page topic. Fetch those linked pages too. Do not follow links from those second-level pages — stop there.
 
@@ -404,14 +458,18 @@ Rewrite the draft sections where enrichment adds value. For each change:
 - Prefer precision over length — a tighter, more accurate sentence beats a longer one.
 - Add links in the Solutions section (or Considerations where appropriate) using the format: `[Link text](URL)`.
 - Do not pad sections just because source material exists — only add what genuinely improves the page.
+- Apply the Concision Constraints above: bullet budgets and anatomy hold, each rationale appears once, and the enriched block stays within the 300–500 word enrichment budget.
+- Run the compression pass from Capability A on the enriched draft before output.
 - Maintain the RSQKit quality principles: the page must still be self-sufficient, accurate, and motivating.
 - Keep prose one sentence per line — both in added content and in existing content you touch; do not reflow paragraphs.
 
 ### Step 5 — Output
 
-Produce the enriched task page in full, using the standard RSQKit format.
+Produce the enriched task page in full, using the standard RSQKit format. 
 
 Optionally, provide a brief summary of what was changed and why — useful when the user wants to understand what the enrichment pass did.
+
+---
 
 ## Quality Check After Enrichment
 
@@ -419,11 +477,17 @@ After integrating sources, verify the page still meets the RSQKit core principle
 
 - [ ] Reader can still form a correct understanding without following any links.
 - [ ] No section has become bloated with content better left to external resources.
+- [ ] Each H2 block is within the 300–500 word enrichment budget (excluding code).
+- [ ] Bullet budgets and anatomy from Capability A still hold; no bullet exceeds two sentences.
+- [ ] No fact or rationale appears more than once on the page after integration.
+- [ ] The compression pass has been run on the enriched draft.
 - [ ] All added links point to high-quality, relevant, stable external material.
 - [ ] Content is factually accurate — sources have been interpreted correctly.
 - [ ] The Task → Description → Considerations → Solutions structure is intact.
 - [ ] Prose is one sentence per line; no existing one-sentence-per-line content was reflowed into wrapped paragraphs.
 - [ ] Added content doesn't contradict existing good content in the draft.
+
+---
 
 ## Scope Boundaries
 
@@ -434,10 +498,12 @@ After integrating sources, verify the page still meets the RSQKit core principle
 | URLs provided by the user | Changing the RSQKit page format |
 | Links found on fetched pages (1 level deep, relevant only) | Reproducing external content verbatim at length |
 
-## Enrichment Notes
+---
 
-- This capability is designed to run **after** a draft exists (Capability A), but can also enrich an existing published task page.
-- Additional passes for **page metadata**, **internal cross-links**, and **resource vetting**: metadata is Capability D; internal cross-links and resource vetting remain out of scope.
+## Notes
+
+- This skill is designed to run **after** Capability A has produced a draft, but can also enrich an existing published task page.
+- Additional passes for **page metadata**, **internal cross-links**, and **resource vetting** are out of scope here and handled separately.
 - If no source material meaningfully improves the draft, say so rather than making superficial changes.
 
 ---
@@ -445,6 +511,8 @@ After integrating sources, verify the page still meets the RSQKit core principle
 # Capability C — Tool Tagging
 
 This capability scans an RSQKit task page for links to tools and replaces them with the RSQKit tool tag syntax. It also identifies tool links that are not yet in the tools registry and suggests YAML entries for them.
+
+---
 
 ## What This Capability Does
 
@@ -454,6 +522,8 @@ This capability scans an RSQKit task page for links to tools and replaces them w
 4. **Identifies** unmatched links and decides whether they are tools needing registry entries, or non-tool references (documents, papers, project sites, standards) that should be left as plain links
 5. **Outputs** the updated page and, where applicable, suggested YAML entries for new tools
 
+---
+
 ## Tool Tag Syntax
 
 The replacement format is:
@@ -462,7 +532,7 @@ The replacement format is:
 {% tool "id" %}
 ```
 
-where `id` is the `id` field from `tool_and_resource_list.yml` (the **id** column of the Tools Registry below). The tag replaces the entire Markdown link — both the link text and the URL.
+where `id` is the `id` field from `tool_and_resource_list.yml`. The tag replaces the entire Markdown link — both the link text and the URL.
 
 **Example:**
 
@@ -474,10 +544,12 @@ Before: [Ruff documentation](https://docs.astral.sh/ruff/)
 After:  {% tool "ruff" %}
 
 Before: [pre-commit](https://pre-commit.com/)
-After:  {% tool "precommit" %}
+After:  {% tool "pre-commit" %}
 ```
 
 Note that the tool tag replaces the link entirely — the link text is discarded because the tag renders with the tool's name from the registry.
+
+---
 
 ## Matching Rules
 
@@ -496,6 +568,8 @@ If both URL and name matching fail, check whether the link text or URL strongly 
 ### Precedence
 URL match > name match > description match. If uncertain, do not match — flag it as unmatched instead.
 
+---
+
 ## Classifying Unmatched Links
 
 Not every link is a tool. When a link has no registry match, classify it as one of:
@@ -512,6 +586,8 @@ Not every link is a tool. When a link has no registry match, classify it as one 
 - A link where the display text is a tool name and the URL goes to that tool's official site or repo
 
 When in doubt, err toward leaving the link as-is rather than incorrectly tagging it.
+
+---
 
 ## Process
 
@@ -540,7 +616,7 @@ Produce three outputs:
 ```
 Replaced:
 - [ruff](https://docs.astral.sh/ruff/) → {% tool "ruff" %}
-- [pre-commit](https://pre-commit.com/) → {% tool "precommit" %}
+- [pre-commit](https://pre-commit.com/) → {% tool "pre-commit" %}
 
 Left as plain links (not tools):
 - [Software Engineering at Google](https://abseil.io/resources/swe-book) — book/reference
@@ -566,6 +642,8 @@ Potential new tool entries (not in registry):
 
 Generate the description from what you know about the tool. Flag it clearly as a suggested entry that the user should review before adding to the file.
 
+---
+
 ## Important Constraints
 
 - **Do not modify Further Reading links.** The Further Reading section contains links to books, papers, and documentation resources. These should always remain as plain Markdown links — do not replace them with tool tags even if a tool in the registry has the same URL or name. Further Reading is for human-readable references, not tool tags.
@@ -573,6 +651,8 @@ Generate the description from what you know about the tool. Flag it clearly as a
 - **Preserve link context.** When a tool is mentioned multiple times on the page, replace all occurrences.
 - **Do not add tool tags for tools not in the registry** — only suggest YAML entries; never emit `{% tool "id" %}` for an id that does not exist in the registry.
 - **Preserve the page's line structure.** Replace only the link tokens; do not reflow, rewrap, or merge prose. RSQKit body content is written one sentence per line — keep each sentence on its own line so the substitution produces a minimal, reviewable diff (ideally only the matched link changes). The suggested YAML entries in output C are front-matter-style and are exempt — they use block scalars (`>-`), not one sentence per line.
+
+---
 
 ## Tools Registry
 
@@ -785,6 +865,8 @@ The following is the embedded tools registry extracted from `tool_and_resource_l
 
 This capability generates and reviews the YAML front matter metadata block for RSQKit task pages. Metadata appears at the very top of a page file, delimited by `---` before and after it.
 
+---
+
 ## Metadata Format
 
 A complete task page metadata block looks like this:
@@ -805,6 +887,8 @@ keywords: ["keyword one", "keyword two", "keyword three"]
 **Line formatting.** Front matter is YAML, so the one-sentence-per-line convention used for RSQKit page *content* does not apply here.
 Keep each metadata key on its own line (standard YAML mapping).
 Do not split a value across lines by sentence: a multi-sentence `description` stays on its single line; only if a value genuinely must span lines, use a YAML block scalar (`>-` or `|`) rather than sentence-per-line breaks.
+
+---
 
 ## Field-by-Field Guidance
 
@@ -847,16 +931,18 @@ The slug is the `abbreviation` value from the YAML (identical to the final path 
 
 Leave as `[]` if no indicators clearly apply.
 
-See the **Quality Indicators Reference** section below for all current slugs and their descriptions.
+See the **Quality Indicators Reference** section below for all current slugs and their descriptions
 
 ### `keywords`
-A list of lowercase keyword strings related to the topic. Used to power search within RSQKit and to connect to external training registries (e.g. TeSS).
+A list of lowercase keyword strings related to the topic. Used to power search within RSQKit and to connect to external training registries (e.g. TeSS). 
 
 Guidelines:
 - Reuse keywords already used on related pages where appropriate — this helps build a consistent folksonomy across RSQKit.
 - Include the core topic term(s), common synonyms, and any tool names or standards that are central to the page.
 - Aim for 3–8 keywords. Avoid padding with generic terms like "software" or "research" unless they are genuinely distinctive.
 - All lowercase.
+
+---
 
 ## Existing Page IDs
 
@@ -906,6 +992,8 @@ The **Content summary** column captures what each page actually covers in its bo
 *Note: this list reflects the live RSQKit task pages as of 22 June 2026 — 34 pages. New pages may have been added since; ask the user to confirm if you are unsure whether a related page exists.*
 
 *File-name vs `page_id` mismatches in the current set (always key on the `page_id`): `software_maintenance.md` → `maintaining_research_software`; `software_project_structure.md` → `structuring_software_projects` (this page was previously `organising_software_projects` — treat that old ID as stale); `writing_research_software_stories.md` → `writing_research_software_story` (singular).*
+
+---
 
 ## Quality Indicators Reference
 
@@ -963,6 +1051,8 @@ When populating `quality_indicators`, match the page's content against the **des
 
 *Note: the descriptions above are copied verbatim from `quality_indicators.yml` (with a few obvious source typos corrected). The file changes over time — if the user supplies an updated version, regenerate this list from it: one bullet per entry, slug taken from `abbreviation`, text taken from `description`, alphabetical by slug.*
 
+---
+
 ## Process for Generating Metadata
 
 When asked to generate metadata for a task page:
@@ -984,6 +1074,8 @@ When asked to generate metadata for a task page:
 8. **Choose `keywords`** — include the core topic term(s), tool names or standards covered, and any synonyms likely to be used in search. Check keywords used on related pages and reuse where appropriate.
 
 9. **Output the complete metadata block**, delimited by `---`, ready to be placed at the top of the page file.
+
+---
 
 ## Common Mistakes to Avoid
 
@@ -1017,4 +1109,6 @@ When you have run the full pipeline, a complete page file is assembled top-to-bo
 ## AI Disclosure
 ```
 
-…with tool tags (Capability C) substituted into the body, and content enriched (Capability B) as needed. Always preserve the one-sentence-per-line source convention in the body, and keep the front matter as standard YAML.
+…with tool tags (Capability C) substituted into the body, and content enriched (Capability B) as needed.
+Always preserve the one-sentence-per-line source convention in the body, and keep the front matter as standard YAML.
+
