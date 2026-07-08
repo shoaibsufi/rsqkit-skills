@@ -2,17 +2,17 @@
 name: rsqkit-task-page-metadata
 description: Use this skill whenever the user wants to generate, suggest, review, or improve the YAML front matter metadata for an RSQKit task page. Trigger when the user asks to "add metadata", "generate the front matter", "suggest page metadata", "what should the metadata be?", "write the YAML header", or any similar phrasing. Also trigger when the user has a drafted or existing RSQKit task page and wants to make it publication-ready with correct metadata. Always use this skill when working on RSQKit page metadata, even if the user just says "can you add the metadata to this page?".
 ---
- 
+
 # RSQKit Task Page Metadata Skill
- 
+
 This skill generates and reviews the YAML front matter metadata block for RSQKit task pages. Metadata appears at the very top of a page file, delimited by `---` before and after it.
- 
+
 ---
- 
+
 ## Metadata Format
- 
+
 A complete task page metadata block looks like this:
- 
+
 ```yaml
 ---
 title: "Page title here"
@@ -25,71 +25,75 @@ quality_indicators: [indicator_abbreviation_one, indicator_abbreviation_two]
 keywords: ["keyword one", "keyword two", "keyword three"]
 ---
 ```
- 
+
 **Line formatting.** Front matter is YAML, so the one-sentence-per-line convention used for RSQKit page *content* does not apply here.
 Keep each metadata key on its own line (standard YAML mapping).
 Do not split a value across lines by sentence: a multi-sentence `description` stays on its single line; only if a value genuinely must span lines, use a YAML block scalar (`>-` or `|`) rather than sentence-per-line breaks.
- 
+
 ---
- 
+
 ## Field-by-Field Guidance
- 
+
 ### `title`
 The full display title of the page. Used as the H1 heading in the rendered page. Should match the main Task heading of the page content closely, but as a noun phrase rather than a question.
 - ✓ `"Using static analysis"`
 - ✗ `"How do you use static analysis?"`
+
 ### `description`
 A short, plain-prose description of what this page covers. This appears in tile/card views when pages are listed (e.g. search results, related pages). Aim for 1–2 sentences. Write in third person, not second person.
 - ✓ `"How to use AI tools to assess the quality of your research software."`
 - ✗ `"You should read this if you want to know about AI quality tools."`
+
 ### `contributors`
 A list of contributors who authored or contributed significantly to the page. Each name must match an entry in the RSQKit `_data/CONTRIBUTORS.yml` file. If you do not know who contributed, leave this as an empty list `[]` and flag it for the user to complete.
- 
+
 ### `page_id`
 A unique slug identifier for this page. Used in `related_pages` references on other pages.
 - Use lowercase letters and underscores only — no hyphens, no spaces.
 - Base it on the most meaningful part of the page title.
 - Examples: `static_analysis`, `ai_quality_assessment`, `creating_good_readme`, `licensing_software`
 - Check existing page IDs (listed below) to avoid conflicts.
+
 ### `related_pages`
 A list of `page_id`s of other RSQKit task pages that are related to this one. These appear as "Related pages" on the rendered page. The format is:
- 
+
 ```yaml
 related_pages:
   tasks: [page_id_one, page_id_two]
 ```
- 
+
 **How to select related pages**: choose pages that a reader of this page would plausibly also benefit from reading — either because the topic is a prerequisite, a natural next step, or closely overlapping. Use the **Content summary** column in the Existing Page IDs section to judge genuine topical overlap rather than relying on similarity of `title` or `page_id`. Do not list everything; be selective. A list of 2–5 is typical.
- 
+
 See the **Existing Page IDs** section below for all current page IDs you can reference.
- 
+
 ### `quality_indicators`
 A list of quality indicator **slugs** from the RSQKit `quality_indicators.yml` file. These are the indicators most directly relevant to the topic of the page — i.e., indicators that a reader applying this page's guidance would be helping to satisfy.
- 
+
 The slug is the `abbreviation` value from the YAML (identical to the final path segment of each indicator's `@id`). Always put the slug in this field — e.g. `software_has_license` — never the descriptive text.
- 
+
 Leave as `[]` if no indicators clearly apply.
- 
+
 See the **Quality Indicators Reference** section below for all current slugs and their descriptions
- 
+
 ### `keywords`
 A list of lowercase keyword strings related to the topic. Used to power search within RSQKit and to connect to external training registries (e.g. TeSS). 
- 
+
 Guidelines:
 - Reuse keywords already used on related pages where appropriate — this helps build a consistent folksonomy across RSQKit.
 - Include the core topic term(s), common synonyms, and any tool names or standards that are central to the page.
 - Aim for 3–8 keywords. Avoid padding with generic terms like "software" or "research" unless they are genuinely distinctive.
 - All lowercase.
+
 ---
- 
+
 ## Existing Page IDs
- 
+
 Use these when populating `related_pages`, and to check `page_id` uniqueness. These are all current RSQKit task pages.
- 
+
 The **Content summary** column captures what each page actually covers in its body (a content fingerprint drawn from its section structure and prose), and is deliberately distinct from the front-matter `description:` tagline. Use it to match pages by **topical overlap**, not just by similarity of `title` or `page_id` — two pages can be closely related while having quite different names.
- 
+
 **Caution:** the key is the `page_id`, which is not always the same as the file name. Where they differ it is noted under the table. Always reference the `page_id`.
- 
+
 | page_id | Title | Content summary |
 |---|---|---|
 | `archiving_software` | Archiving software | Why code-hosting platforms are insufficient for long-term preservation, and how to archive research software: capturing execution environments, build reproducibility, versioning/provenance, emulation/containers, and DOI-backed deposit via Software Heritage, Zenodo, ReproZip, Guix/Nix and RO-Crate metadata. |
@@ -126,19 +130,19 @@ The **Content summary** column captures what each page actually covers in its bo
 | `using_version_control` | Using version control | Two linked tasks: choosing a version control system for a research project (the decision factors — project/team size, file types, large-binary handling, institutional policies — with Git as the default and alternatives like Git-LFS/Perforce, Mercurial and Subversion for specific needs); and implementing version control in a research workflow (establishing a branching strategy and commit/review guidelines, integrating with IDEs and CI, training the team, tagging versions for reproducibility, and maintaining the repository). |
 | `writing_readable_code` | Writing readable code | Why source-code readability matters for reusability (the 'R' in FAIR) and future maintenance, and the practices that improve it — consistent formatting, modular structure, descriptive names, well-placed comments and docstrings, following a community style guide (PEP8, R, Google), design patterns, type annotations with a checker (mypy), automated formatters (black) and linters (pylint), informative directory structure, and reusing well-tested libraries. |
 | `writing_research_software_story` | Writing a Research Software Story | What a Research Software Story is — a structured narrative capturing the context and role of a research software project (the problem it addresses, the community around it, and the practices and tools that support it, rather than how to run it) — who benefits (new contributors, project leaders, funders/reviewers) and the reflective value of writing one, the template sections it follows, and practical ways to produce a version-zero draft (working through the template, a paired interview, or LLM-assisted structured prompting), plus refinement tips and seminar resources. |
- 
+
 *Note: this list reflects the live RSQKit task pages as of 22 June 2026 — 34 pages. New pages may have been added since; ask the user to confirm if you are unsure whether a related page exists.*
- 
+
 *File-name vs `page_id` mismatches in the current set (always key on the `page_id`): `software_maintenance.md` → `maintaining_research_software`; `software_project_structure.md` → `structuring_software_projects` (this page was previously `organising_software_projects` — treat that old ID as stale); `writing_research_software_stories.md` → `writing_research_software_story` (singular).*
- 
+
 ---
- 
+
 ## Quality Indicators Reference
- 
+
 When populating `quality_indicators`, match the page's content against the **descriptions** below and select the indicators that a reader applying the page's guidance would be helping to satisfy. Be conservative — a short, accurate list beats a long, speculative one.
- 
+
 **Put the slug — the back-ticked identifier at the start of each bullet — in the `quality_indicators` field. Never use the descriptive text.** Each slug is the verbatim `abbreviation` from `quality_indicators.yml` (identical to the final path segment of that indicator's `@id`). The description exists only to help you decide *which* slugs apply; it is never what goes into the metadata.
- 
+
 - `archived_in_scholarly_repository` — The source code repository is archived in a scholarly repository (e.g Zenodo, HAL) to ensure that software can be found and accessed in a scholarly context.
 - `archived_in_software_heritage` — The source code repository is found in the universal source code archive, Software Heritage, to ensure long-term access to the full development history.
 - `code_churn_ok` — The code churn (how much a source code has changed over time) of the project's source code is maintained within a reasonable level according to the community's standards and conventions. An example of how to calculate it would be code churn = added lines + deleted lines.
@@ -186,27 +190,37 @@ When populating `quality_indicators`, match the page's content against the **des
 - `uses_tool_for_warnings_and_mistakes` — This indicator checks that the project enables one or more compiler warning flags, a "safe" language mode, or uses a separate "linter" tool to look for code quality errors or common simple mistakes, if there is at least one FLOSS tool that can implement this criterion in the selected language.
 - `version_control_use` — This indicator aims to determine if a software project uses version control.
 - `versioning_standards_use` — This indicator aims to determine if the version (or versions) of a software tool follows an established community convention like semantic versioning (SemVer) or calendar versioning (CalVer).
+
 *Note: the descriptions above are copied verbatim from `quality_indicators.yml` (with a few obvious source typos corrected). The file changes over time — if the user supplies an updated version, regenerate this list from it: one bullet per entry, slug taken from `abbreviation`, text taken from `description`, alphabetical by slug.*
- 
+
 ---
- 
+
 ## Process for Generating Metadata
- 
+
 When asked to generate metadata for a task page:
- 
+
 1. **Read the page content** — understand the topic, the task(s) covered, and the tools or practices discussed.
+
 2. **Derive `title`** — use a noun-phrase version of the main Task heading.
+
 3. **Write `description`** — one or two sentences summarising what the page covers, in third person.
+
 4. **Set `contributors`** — ask the user if not clear from context; do not invent names.
+
 5. **Generate `page_id`** — lowercase slug from the most meaningful part of the title. Check against the existing page IDs list to avoid conflicts.
+
 6. **Select `related_pages`** — scan the Existing Page IDs table, using the **Content summary** column to judge topical overlap (not just `title` or `page_id` similarity), and select 2–5 pages that are genuinely related. Reason briefly about why each is included if it is not obvious.
+
 7. **Select `quality_indicators`** — scan the indicators reference list, matching the page's content against the descriptions, and select those the page's guidance directly helps to satisfy. Put the **slug** (the back-ticked identifier) in the field — never the description text. Be conservative — a short accurate list is better than a long speculative one.
+
 8. **Choose `keywords`** — include the core topic term(s), tool names or standards covered, and any synonyms likely to be used in search. Check keywords used on related pages and reuse where appropriate.
+
 9. **Output the complete metadata block**, delimited by `---`, ready to be placed at the top of the page file.
+
 ---
- 
+
 ## Common Mistakes to Avoid
- 
+
 - **Inventing page IDs** — only reference page IDs from the existing page IDs list; do not guess.
 - **Over-populating quality_indicators** — only include indicators the page's content directly helps satisfy, not every vaguely related one.
 - **Putting descriptions instead of slugs in `quality_indicators`** — the field takes the slug (e.g. `software_has_license`), never the indicator's descriptive text.

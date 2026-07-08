@@ -2,124 +2,128 @@
 name: rsqkit-task-page-update-tools
 description: Use this skill whenever the user wants to replace tool links in an RSQKit task page with the RSQKit tool tag syntax {% tool "id" %}. Trigger when the user says things like "update the tool links", "replace links with tool tags", "add tool tags to this page", "convert links to tool syntax", or any similar phrasing. Also trigger when the user wants to check whether tools mentioned on a page exist in the tool_and_resource_list.yml file, or wants suggestions for new tool entries to add to that file. Always use this skill after rsqkit-task-page has produced a draft and before rsqkit-task-page-metadata is run, though order relative to rsqkit-task-page-enrich is flexible.
 ---
- 
+
 # RSQKit Task Page Update Tools Skill
- 
+
 This skill scans an RSQKit task page for links to tools and replaces them with the RSQKit tool tag syntax. It also identifies tool links that are not yet in the tools registry and suggests YAML entries for them.
- 
+
 ---
- 
+
 ## What This Skill Does
- 
+
 1. **Scans** the task page for all Markdown links: `[text](url)`
 2. **Matches** each link against the tools registry (by URL, name, or description)
 3. **Replaces** matched links with `{% tool "id" %}`
 4. **Identifies** unmatched links and decides whether they are tools needing registry entries, or non-tool references (documents, papers, project sites, standards) that should be left as plain links
 5. **Outputs** the updated page and, where applicable, suggested YAML entries for new tools
+
 ---
- 
+
 ## Tool Tag Syntax
- 
+
 The replacement format is:
- 
+
 ```
 {% tool "id" %}
 ```
- 
+
 where `id` is the `id` field from `tool_and_resource_list.yml`. The tag replaces the entire Markdown link — both the link text and the URL.
- 
+
 **Example:**
- 
+
 ```
 Before: [ruff](https://docs.astral.sh/ruff/)
 After:  {% tool "ruff" %}
- 
+
 Before: [Ruff documentation](https://docs.astral.sh/ruff/)
 After:  {% tool "ruff" %}
- 
+
 Before: [pre-commit](https://pre-commit.com/)
-After:  {% tool "precommit" %}
+After:  {% tool "pre-commit" %}
 ```
- 
+
 Note that the tool tag replaces the link entirely — the link text is discarded because the tag renders with the tool's name from the registry.
- 
+
 ---
- 
+
 ## Matching Rules
- 
+
 ### URL matching
 Compare the link URL against the `url` field in the registry. Apply these normalisation rules before comparing:
 - Strip a trailing `/` from both URLs before comparing (treat `https://example.com/` and `https://example.com` as identical)
 - Treat `http://` and `https://` as equivalent
 - Ignore case differences in the domain
+
 ### Name matching
 If URL matching fails, compare the link text against the `name` field in the registry (case-insensitive). This catches cases where a tool is linked with a slightly different URL but an identical or near-identical display name.
- 
+
 ### Description matching
 If both URL and name matching fail, check whether the link text or URL strongly suggests a tool that exists in the registry (e.g. a known alias, abbreviation, or variant spelling). Use judgement conservatively — only match on description if confident.
- 
+
 ### Precedence
 URL match > name match > description match. If uncertain, do not match — flag it as unmatched instead.
- 
+
 ---
- 
+
 ## Classifying Unmatched Links
- 
+
 Not every link is a tool. When a link has no registry match, classify it as one of:
- 
+
 **Leave as a plain link (not a tool):**
 - Academic papers or preprints (arXiv, DOI links, journal URLs)
 - Standards documents (e.g. W3C, ISO, IETF specs)
 - Project or initiative homepages that are not software tools (e.g. a research project website, a community initiative)
 - Documentation pages that describe a concept rather than a tool (e.g. a Wikipedia article, a language spec page)
 - Registry or repository entries for a specific software package (e.g. a Zenodo record, a PyPI package page for a specific library)
+
 **Flag as a potential new tool entry:**
 - A link to a tool's homepage, documentation site, or GitHub repository where the linked thing is clearly software that researchers or developers would use directly
 - A link where the display text is a tool name and the URL goes to that tool's official site or repo
+
 When in doubt, err toward leaving the link as-is rather than incorrectly tagging it.
- 
+
 ---
- 
+
 ## Process
- 
+
 ### Step 1 — Identify the page and the registry
 Establish the task page to process. The tools registry is embedded in this skill (see **Tools Registry** section below). If the user provides an updated `tool_and_resource_list.yml`, use that instead and note that the embedded registry may be out of date.
- 
+
 ### Step 2 — Extract all links
 Find every Markdown link in the page: `[text](url)`. Note the link text, the URL, and its location in the page.
- 
+
 ### Step 3 — Match against registry
 For each link, attempt URL match, then name match, then description match. Record the result: matched (with registry id) or unmatched.
- 
+
 ### Step 4 — Classify unmatched links
 For each unmatched link, decide: leave as plain link, or flag as potential new tool.
- 
+
 ### Step 5 — Apply replacements
 Rewrite the page, replacing matched links with `{% tool "id" %}`. Leave all other links unchanged.
- 
+
 ### Step 6 — Output
- 
+
 Produce three outputs:
- 
+
 **A) The updated page** — the full task page with tool tags substituted.
- 
+
 **B) A summary of replacements made**, in this format:
 ```
 Replaced:
 - [ruff](https://docs.astral.sh/ruff/) → {% tool "ruff" %}
-- [pre-commit](https://pre-commit.com/) → {% tool "precommit" %}
- 
+- [pre-commit](https://pre-commit.com/) → {% tool "pre-commit" %}
+
 Left as plain links (not tools):
 - [Software Engineering at Google](https://abseil.io/resources/swe-book) — book/reference
 - [Continuous Delivery](https://continuousdelivery.com/) — book/reference
- 
+
 Potential new tool entries (not in registry):
 - [clang-tidy](https://clang.llvm.org/extra/clang-tidy/) — C++ linter, likely a tool
 - [cppcheck](https://cppcheck.sourceforge.io/) — C++ static analysis, likely a tool
 ```
- 
+
 **C) Suggested YAML entries** for any links flagged as potential new tools, in the format used by `tool_and_resource_list.yml`:
- 
+
 ```yaml
 - id: clang-tidy
   name: clang-tidy
@@ -130,24 +134,25 @@ Potential new tool entries (not in registry):
   url: 'https://clang.llvm.org/extra/clang-tidy/'
   catalog: RSQKit
 ```
- 
+
 Generate the description from what you know about the tool. Flag it clearly as a suggested entry that the user should review before adding to the file.
- 
+
 ---
- 
+
 ## Important Constraints
- 
+
 - **Do not modify Further Reading links.** The Further Reading section contains links to books, papers, and documentation resources. These should always remain as plain Markdown links — do not replace them with tool tags even if a tool in the registry has the same URL or name. Further Reading is for human-readable references, not tool tags.
 - **Do not modify internal RSQKit page links** (relative links or links to other RSQKit pages).
 - **Preserve link context.** When a tool is mentioned multiple times on the page, replace all occurrences.
 - **Do not add tool tags for tools not in the registry** — only suggest YAML entries; never emit `{% tool "id" %}` for an id that does not exist in the registry.
 - **Preserve the page's line structure.** Replace only the link tokens; do not reflow, rewrap, or merge prose. RSQKit body content is written one sentence per line — keep each sentence on its own line so the substitution produces a minimal, reviewable diff (ideally only the matched link changes). The suggested YAML entries in output C are front-matter-style and are exempt — they use block scalars (`>-`), not one sentence per line.
+
 ---
- 
+
 ## Tools Registry
- 
+
 The following is the embedded tools registry extracted from `tool_and_resource_list.yml`. This may become outdated as the file changes. If the user provides an updated file, use that instead.
- 
+
 | id | name | url |
 |---|---|---|
 | `mypy` | mypy | https://mypy-lang.org/ |
@@ -346,5 +351,5 @@ The following is the embedded tools registry extracted from `tool_and_resource_l
 | `pyright` | Pyright | https://github.com/microsoft/pyright |
 | `jet-jl` | JET.jl | https://aviatesk.github.io/JET.jl/stable/ |
 | `aqua-jl` | Aqua.jl | https://juliatesting.github.io/Aqua.jl/stable/ |
- 
+
 *Note: this registry is embedded from `tool_and_resource_list.yml`. Last regenerated 2026-06-22 from the file provided by the user (189 entries). The final 7 rows (`clang-tidy`, `cppcheck`, `fortran-linter`, `flint`, `pyright`, `jet-jl`, `aqua-jl`) are static-analysis linters that are not yet in `tool_and_resource_list.yml`; they come from an unmerged pull request and are expected to land in the production file. Remove them here if that PR is rejected. If the user provides a newer version of the file, use that in preference to this table, and update this skill to match.*
