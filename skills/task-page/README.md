@@ -122,7 +122,7 @@ Give Claude a topic and ask it to write a task page. For example:
 
 Claude will use the `rsqkit-task-page` skill to produce a page following the conventions above, including Further Reading and AI Disclosure.
 
-**Review the draft.** Check that the content is accurate and the balance between sections feels right. Ask Claude to adjust anything that doesn't read well or is missing something important. You can also paste in an existing page and ask for a review against the RSQKit format — the skill contains a full review checklist.
+**Review the draft.** Check that the content is accurate and the balance between sections feels right. Ask Claude to adjust anything that doesn't read well or is missing something important - you can and will manually edit content also - repeated inconsistencies can be easier to deal with by asking Claude to re-draft. You can also paste in an existing page and ask for a review against the RSQKit format — the skill contains a full review checklist.
 
 ---
 
@@ -331,6 +331,11 @@ Your Full Name:
   role: author
   affiliation: Your Institution
 ```
+### Update the side menu
+
+**Location** `_data/sidebars/main.yml`
+
+Add a `-title:` and corresponding `url:` (page file name without the .md) under `subitems:` to the `- title: Tasks (alphabetical)` section; don't worry about where in the list you add the title & url entries as they will be rendered in alphabetical order, for sub-pages find the matching parent page and put the title & url entry under its `subitems` section.
 
 ---
 
@@ -343,8 +348,9 @@ RSQKit uses a standard GitHub pull request workflow.
 3. Add your page file to `pages/tasks/`
 4. Add any new tool entries to `_data/tool_and_resource_list.yml`
 5. Add your contributor entry to `_data/CONTRIBUTORS.yml` if needed
-6. Open a pull request against the `main` branch
-7. The RSQKit Editorial Board will review and provide feedback
+6. Add your new page to `_data/sidebars/main.yml`
+7. Open a pull request against the `main` branch
+8. The RSQKit Editorial Board will review and provide feedback
 
 See the [RSQKit Contribution Guidelines](https://github.com/EVERSE-ResearchSoftware/RSQKit/blob/main/pages/contributing/contribution_guidelines.md) for more detail on the review process.
 
