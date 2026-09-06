@@ -90,11 +90,11 @@ This rule applies everywhere on the page — Solutions bullets, Considerations, 
 
 ## Page Format
 
-RSQKit task pages use a repeating structure. Each distinct task or sub-task gets its own block of four headings. If the overall page topic breaks into distinct sub-tasks, repeat the full block for each one. Every page also ends with a **Further Reading** section.
+RSQKit task pages use a repeating structure. Each task or sub-task substantial enough to stand on its own gets its own block of four headings. Repeat the full block for an additional sub-task only when it is independently substantial (see "When to split into sub-tasks" below); otherwise keep the page to a single block. Every page also ends with a **Further Reading** section.
 
-**Length budget:** aim for 250–400 words per H2 block, excluding code blocks and the Further Reading section. If a block wants to be much longer, either the task is really two tasks, or the excess content belongs behind a link.
+**Length budget:** aim for 250–475 words per H2 block, excluding code blocks and the Further Reading section. If a block wants to be much longer, either the task is really two tasks, or the excess content belongs behind a link.
 
-**When to split into sub-tasks:** only create a separate sub-task block when it can independently justify all three of Description, Considerations, and Solutions. A thin sub-task generates three sections of scaffolding for little content — merge it into a neighbouring block instead.
+**When to split into sub-tasks:** default to a single H2 block. Add a second (or further) H2 block only when each sub-task is independently substantial — each must be able to justify a full Description, Considerations, and Solutions of its own. A thin sub-task generates three sections of scaffolding for little content — merge it into a neighbouring block instead.
 
 **No cross-section redundancy:** each fact or rationale appears exactly once on the page. The Description explains why the task matters; Considerations must not re-explain it. Considerations raise the trade-offs; Solutions must not restate them before acting on them.
 
@@ -133,6 +133,7 @@ For a page with two sub-tasks, the structure would be:
 #### Description (H3)
 - A short, direct explanation of what the task or problem is about and why it matters to the reader.
 - This is not an introduction to the wider topic — it's scoped to this specific task.
+- If readers are likely to overestimate what the practice achieves, state plainly what it does not guarantee — but only where that misunderstanding is genuinely likely, not as a routine disclaimer, and within the 2–4 sentence budget rather than on top of it.
 - Aim for 2–4 sentences. Avoid padding.
 
 #### Considerations (H3)
@@ -216,7 +217,7 @@ After completing a draft, make a second pass whose only goal is to shorten it by
 2. Delete any sentence that restates a rationale already given elsewhere on the page.
 3. Strip signposting sentences ("The following considerations apply...", "In summary...", "It is important to note that...").
 4. Tighten every bullet to the anatomy above: one insight or action, at most one supporting clause.
-5. Check each H2 block against the 250–400 word budget; if over, cut or move content behind a link.
+5. Check each H2 block against the 250–475 word budget; if over, cut or move content behind a link.
 
 Only present the post-compression draft to the user.
 
@@ -229,7 +230,8 @@ Use this checklist when drafting or reviewing a task page.
 ### Structure
 - [ ] Page uses the correct heading hierarchy: H2 for task question(s), H3 for Description / Considerations / Solutions.
 - [ ] The word "Task" does not appear as a heading — the task question itself is the H2 heading.
-- [ ] Sub-tasks each have their own full H2 block (not crammed into one block).
+- [ ] The page uses more than one H2 block only where each sub-task is independently substantial; a single task stays as one block.
+- [ ] Where there are genuinely substantial sub-tasks, each has its own full H2 block (not crammed into one block).
 - [ ] No headings are missing or at the wrong level.
 - [ ] Body prose is one sentence per line; paragraphs are separated by blank lines, with no blank line between sentences of the same paragraph.
 - [ ] Page ends with `## Further Reading` (H2).
@@ -252,6 +254,7 @@ Use this checklist when drafting or reviewing a task page.
 - [ ] Explains what the problem/task is and why it matters to the reader.
 - [ ] Scoped to this task, not the wider topic.
 - [ ] 2–4 sentences; no padding.
+- [ ] Where a common misunderstanding is likely, the Description states what the practice does not guarantee (and omits it otherwise).
 
 ### Considerations section
 - [ ] Lists things the reader genuinely needs to keep in mind.
@@ -274,7 +277,7 @@ Use this checklist when drafting or reviewing a task page.
 ### Concision
 - [ ] No bullet exceeds two sentences; most are one.
 - [ ] No fact or rationale appears more than once on the page.
-- [ ] Each H2 block is within the 250–400 word budget (excluding code).
+- [ ] Each H2 block is within the 250–475 word budget (excluding code).
 - [ ] No signposting or summary sentences.
 - [ ] The compression pass has been run before presenting the draft.
 
@@ -298,6 +301,7 @@ Use this checklist when drafting or reviewing a task page.
 - **Third person voice** — writing "researchers should..." or "teams need to..." instead of addressing the reader directly as "you".
 - **Approachable tipping into casual** — "you" does not license slang, chattiness, conversational preambles, or reassurance softeners; keep a professional register. Approachable means plainer language and acknowledging difficulty, not more words.
 - **Description that doesn't explain why it matters** — don't just describe the topic; say why it's important for the reader's research software quality.
+- **Description that oversells the practice** — where readers would plausibly assume the practice guarantees more than it does, say what it does not guarantee; leave this out when no such misunderstanding is likely.
 - **Considerations that are obvious** — cut bullets like "Testing takes time" unless they lead somewhere useful.
 - **Solutions that are only links** — external links are good but the reader must get something actionable even without clicking.
 - **Solutions that reproduce external content at length** — summarise, frame, and link; don't copy.

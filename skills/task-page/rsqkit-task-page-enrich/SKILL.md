@@ -33,11 +33,11 @@ Enrichment does **not**:
 
 Enriched output must respect the concision rules in the `rsqkit-task-page` skill: bullet budgets (4–7 Considerations, 5–8 Solutions), bullet anatomy (one insight or action, at most one supporting clause), no cross-section redundancy, no signposting sentences, and the mandatory compression pass before output.
 
-**Word budget when this skill is invoked:** the per-block budget is **300–500 words** per H2 block (excluding code blocks and Further Reading), replacing the base 250–400 budget from `rsqkit-task-page`.
+**Word budget when this skill is invoked:** the per-block budget is **350–650 words** per H2 block (excluding code blocks and Further Reading), replacing the base 250–475 budget from `rsqkit-task-page`.
 This wider budget exists only because enrichment adds source-backed material; it applies only to enrichment passes and does not change the base budget for plain drafting.
-It is a ceiling, not a target — if the enriched block fits in 300 words, do not grow it to 500.
+It is a ceiling, not a target — if the enriched block fits in 350 words, do not grow it to 650.
 
-If integrating the source material would push a block past 500 words, do not exceed the budget — instead cut weaker existing content to make room, move the excess behind a link, or tell the user the block is at capacity and let them choose what to drop.
+If integrating the source material would push a block past 650 words, do not exceed the budget — instead cut weaker existing content to make room, move the excess behind a link, or tell the user the block is at capacity and let them choose what to drop.
 
 ---
 
@@ -101,7 +101,7 @@ Rewrite the draft sections where enrichment adds value. For each change:
 - Prefer precision over length — a tighter, more accurate sentence beats a longer one.
 - Add links in the Solutions section (or Considerations where appropriate) using the format: `[Link text](URL)`.
 - Do not pad sections just because source material exists — only add what genuinely improves the page.
-- Apply the Concision Constraints above: bullet budgets and anatomy hold, each rationale appears once, and the enriched block stays within the 300–500 word enrichment budget.
+- Apply the Concision Constraints above: bullet budgets and anatomy hold, each rationale appears once, and the enriched block stays within the 350–650 word enrichment budget.
 - Run the compression pass from `rsqkit-task-page` on the enriched draft before output.
 - Maintain the RSQKit quality principles: the page must still be self-sufficient, accurate, and motivating.
 - Keep prose one sentence per line — both in added content and in existing content you touch; do not reflow paragraphs.
@@ -120,7 +120,7 @@ After integrating sources, verify the page still meets the RSQKit core principle
 
 - [ ] Reader can still form a correct understanding without following any links.
 - [ ] No section has become bloated with content better left to external resources.
-- [ ] Each H2 block is within the 300–500 word enrichment budget (excluding code).
+- [ ] Each H2 block is within the 350–650 word enrichment budget (excluding code).
 - [ ] Bullet budgets and anatomy from `rsqkit-task-page` still hold; no bullet exceeds two sentences.
 - [ ] No fact or rationale appears more than once on the page after integration.
 - [ ] The compression pass has been run on the enriched draft.
