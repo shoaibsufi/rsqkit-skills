@@ -81,7 +81,7 @@ A list of lowercase keyword strings related to the topic. Used to power search w
 Guidelines:
 - Reuse keywords already used on related pages where appropriate — this helps build a consistent folksonomy across RSQKit.
 - Include the core topic term(s), common synonyms, and any tool names or standards that are central to the page.
-- Aim for 3–8 keywords. Avoid padding with generic terms like "software" or "research" unless they are genuinely distinctive.
+- Aim for 3–12 keywords. Pages with several H2 blocks will usually need more keywords than single-block pages, so that each block is covered. Avoid padding with generic terms like "software" or "research" unless they are genuinely distinctive.
 - All lowercase.
 
 ---

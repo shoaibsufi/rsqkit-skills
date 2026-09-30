@@ -1,20 +1,20 @@
 ---
 name: rsqkit-task-page-update-tools
-description: Use this skill whenever the user wants to replace tool links in an RSQKit task page with the RSQKit tool tag syntax {% tool "id" %}. Trigger when the user says things like "update the tool links", "replace links with tool tags", "add tool tags to this page", "convert links to tool syntax", or any similar phrasing. Also trigger when the user wants to check whether tools mentioned on a page exist in the tool_and_resource_list.yml file, or wants suggestions for new tool entries to add to that file. Always use this skill after rsqkit-task-page has produced a draft and before rsqkit-task-page-metadata is run, though order relative to rsqkit-task-page-enrich is flexible.
+description: Use this skill whenever the user wants to replace tool links, or tool names written in backticks, in an RSQKit task page with the RSQKit tool tag syntax {% tool "id" %}. Trigger when the user says things like "update the tool links", "replace links with tool tags", "add tool tags to this page", "convert links to tool syntax", or any similar phrasing. Also trigger when the user wants to check whether tools mentioned on a page exist in the tool_and_resource_list.yml file, or wants suggestions for new tool entries to add to that file. Always use this skill after rsqkit-task-page has produced a draft and before rsqkit-task-page-metadata is run, though order relative to rsqkit-task-page-enrich is flexible.
 ---
 
 # RSQKit Task Page Update Tools Skill
 
-This skill scans an RSQKit task page for links to tools and replaces them with the RSQKit tool tag syntax. It also identifies tool links that are not yet in the tools registry and suggests YAML entries for them.
+This skill scans an RSQKit task page for links to tools, and for tool names written in backticks, and replaces them with the RSQKit tool tag syntax. It also identifies tools that are not yet in the tools registry and suggests YAML entries for them.
 
 ---
 
 ## What This Skill Does
 
-1. **Scans** the task page for all Markdown links: `[text](url)`
-2. **Matches** each link against the tools registry (by URL, name, or description)
-3. **Replaces** matched links with `{% tool "id" %}`
-4. **Identifies** unmatched links and decides whether they are tools needing registry entries, or non-tool references (documents, papers, project sites, standards) that should be left as plain links
+1. **Scans** the task page for all Markdown links: `[text](url)`, and for inline code spans in body prose that name a tool (e.g. `strace`)
+2. **Matches** each link and each backticked tool name against the tools registry (by URL, name, or description)
+3. **Replaces** matched links and matched backticked tool names with `{% tool "id" %}`
+4. **Identifies** unmatched links and decides whether they are tools needing registry entries, or non-tool references (documents, papers, project sites, standards) that should be left as plain links; identifies backticked tool names that are not in the registry
 5. **Outputs** the updated page and, where applicable, suggested YAML entries for new tools
 
 ---
@@ -43,6 +43,34 @@ After:  {% tool "pre-commit" %}
 ```
 
 Note that the tool tag replaces the link entirely — the link text is discarded because the tag renders with the tool's name from the registry.
+
+---
+
+## Tool Names in Backticks
+
+Pages often name tools as inline code rather than links, for example `strace`, `ltrace` or `cProfile`.
+These should also become tool tags.
+
+**Where to look:** inline code spans in the body prose of the Description, Considerations and Solutions sections.
+Skip the YAML front matter, headings, fenced code blocks, and the Further Reading section.
+
+**What counts as a tool name:** an inline code span that contains only the name of a program, library, module or service that a reader would use directly, such as `strace`, `gdb` or `cProfile`.
+
+**What does not count:** a command with arguments (`strace -f ./program`), a compiler or command-line flag (`-fsanitize=address`), a file name or path, a function, method or API name, a configuration key, an environment variable, or any other code expression.
+Leave these unchanged.
+
+**Matching:** compare the name inside the backticks with the registry `name` field (case-insensitive), then use description matching for known aliases or variant spellings, following the Precedence rule below.
+There is no URL to match on.
+
+**Replacement:** replace the whole span, including the backticks, with `{% tool "id" %}`.
+
+```
+Before: On Linux, `strace` is often a useful starting point.
+After:  On Linux, {% tool "strace" %} is often a useful starting point.   (only once `strace` is in the registry)
+```
+
+**Not in the registry:** leave the backticked name unchanged, list it under potential new tool entries, and suggest a YAML entry using the tool's official site or documentation as the `url`.
+Once the user confirms the entry has been added to `tool_and_resource_list.yml`, apply the tag.
 
 ---
 
@@ -89,17 +117,18 @@ When in doubt, err toward leaving the link as-is rather than incorrectly tagging
 ### Step 1 — Identify the page and the registry
 Establish the task page to process. The tools registry is embedded in this skill (see **Tools Registry** section below). If the user provides an updated `tool_and_resource_list.yml`, use that instead and note that the embedded registry may be out of date.
 
-### Step 2 — Extract all links
+### Step 2 — Extract all links and backticked tool names
 Find every Markdown link in the page: `[text](url)`. Note the link text, the URL, and its location in the page.
+Also find every inline code span in the body prose that names a tool, following **Tool Names in Backticks** above. Note the name and its location.
 
 ### Step 3 — Match against registry
-For each link, attempt URL match, then name match, then description match. Record the result: matched (with registry id) or unmatched.
+For each link, attempt URL match, then name match, then description match. For each backticked tool name, attempt name match, then description match. Record the result: matched (with registry id) or unmatched.
 
 ### Step 4 — Classify unmatched links
 For each unmatched link, decide: leave as plain link, or flag as potential new tool.
 
 ### Step 5 — Apply replacements
-Rewrite the page, replacing matched links with `{% tool "id" %}`. Leave all other links unchanged.
+Rewrite the page, replacing matched links and matched backticked tool names with `{% tool "id" %}`. Leave all other links and inline code unchanged.
 
 ### Step 6 — Output
 
@@ -117,12 +146,16 @@ Left as plain links (not tools):
 - [Software Engineering at Google](https://abseil.io/resources/swe-book) — book/reference
 - [Continuous Delivery](https://continuousdelivery.com/) — book/reference
 
+Backticked tool names replaced:
+- `valgrind` → {% tool "valgrind" %}
+
 Potential new tool entries (not in registry):
 - [clang-tidy](https://clang.llvm.org/extra/clang-tidy/) — C++ linter, likely a tool
 - [cppcheck](https://cppcheck.sourceforge.io/) — C++ static analysis, likely a tool
+- `strace` (backticked, left unchanged) — Linux system-call tracer, likely a tool
 ```
 
-**C) Suggested YAML entries** for any links flagged as potential new tools, in the format used by `tool_and_resource_list.yml`:
+**C) Suggested YAML entries** for any links or backticked names flagged as potential new tools, in the format used by `tool_and_resource_list.yml`:
 
 ```yaml
 - id: clang-tidy
@@ -143,7 +176,8 @@ Generate the description from what you know about the tool. Flag it clearly as a
 
 - **Do not modify Further Reading links.** The Further Reading section contains links to books, papers, and documentation resources. These should always remain as plain Markdown links — do not replace them with tool tags even if a tool in the registry has the same URL or name. Further Reading is for human-readable references, not tool tags.
 - **Do not modify internal RSQKit page links** (relative links or links to other RSQKit pages).
-- **Preserve link context.** When a tool is mentioned multiple times on the page, replace all occurrences.
+- **Preserve link context.** When a tool is mentioned multiple times on the page, replace all occurrences, whether linked or backticked.
+- **Do not modify fenced code blocks or inline code that is not a bare tool name.** Commands, flags, paths and code expressions stay as they are.
 - **Do not add tool tags for tools not in the registry** — only suggest YAML entries; never emit `{% tool "id" %}` for an id that does not exist in the registry.
 - **Preserve the page's line structure.** Replace only the link tokens; do not reflow, rewrap, or merge prose. RSQKit body content is written one sentence per line — keep each sentence on its own line so the substitution produces a minimal, reviewable diff (ideally only the matched link changes). The suggested YAML entries in output C are front-matter-style and are exempt — they use block scalars (`>-`), not one sentence per line.
 
