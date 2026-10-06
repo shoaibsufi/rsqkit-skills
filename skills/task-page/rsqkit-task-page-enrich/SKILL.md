@@ -31,18 +31,19 @@ Enrichment does **not**:
 
 ## Concision Constraints During Enrichment
 
-Enriched output must respect the concision rules in the `rsqkit-task-page` skill: its bullet budgets and bullet anatomy, its redundancy rule, its sentence-length guidance, its concept inventory, and its mandatory compression pass.
+Enriched output must respect the concision and readability rules in the `rsqkit-task-page` skill: its bullet budgets and bullet anatomy, its redundancy rule, its sentence-length guidance, its Readability and flow rules, its concept inventory, and its mandatory compression pass.
 Do not copy those rules or their numbers into this skill; refer to `rsqkit-task-page` so the two skills cannot drift apart.
 
 **Word budget when this skill is invoked:** the per-block budget is **350–650 words** per H2 block (excluding code blocks and Further Reading), replacing the base 250–475 budget from `rsqkit-task-page`.
 This wider budget exists only because enrichment adds source-backed material; it applies only to enrichment passes and does not change the base budget for plain drafting.
 It is a ceiling, not a target — if the enriched block fits in 350 words, do not grow it to 650.
+Use any extra room to explain points more clearly, not to add more points or to pack more into each sentence.
 
-**Page ceiling for multi-block pages:** try to keep the enriched page within the base ceiling of 1,800 words of body text from `rsqkit-task-page`.
-Going above it, up to 2,000 words, is allowed but best avoided.
-Never exceed 2,000 words.
+**Page ceiling for multi-block pages:** try to keep the enriched page within the base page budget from `rsqkit-task-page`.
+Going above it, up to 2,400 words of body text, is allowed but best avoided.
+Never exceed 2,400 words.
 
-If integrating the source material would push a block past 650 words, or the page past 2,000 words, do not exceed the budget — instead cut weaker existing content to make room, move the excess behind a link, or tell the user the block or page is at capacity and let them choose what to drop.
+If integrating the source material would push a block past 650 words, or the page past 2,400 words, do not exceed the budget and do not make the text denser to fit — instead cut weaker existing content to make room, move the excess behind a link, or tell the user the block or page is at capacity and let them choose what to drop.
 
 ---
 
@@ -120,7 +121,7 @@ Discard:
 
 Rewrite the draft sections where enrichment adds value. For each change:
 
-- Prefer precision over length — a tighter, more accurate sentence beats a longer one. Do not make a sentence more precise by making it long; keep the average sentence length within the range set in `rsqkit-task-page`.
+- Prefer precision, but not at the cost of readability. Follow the Readability and flow rules in `rsqkit-task-page`: one point per sentence, connecting words kept, normal grammar. Do not make a sentence more precise by packing more into it, and keep the average sentence length within the range set in `rsqkit-task-page`.
 - Add links in the Solutions section (or Considerations where appropriate) using the format: `[Link text](URL)`.
 - Do not pad sections just because source material exists — only add what genuinely improves the page.
 - Apply the Concision Constraints above: the bullet budgets, bullet anatomy, redundancy rule and sentence-length guidance from `rsqkit-task-page` hold, each block stays within the 350–650 word enrichment budget, and the page stays within its ceiling.
@@ -143,7 +144,8 @@ After integrating sources, verify the page still meets the RSQKit core principle
 - [ ] Reader can still form a correct understanding without following any links.
 - [ ] No section has become bloated with content better left to external resources.
 - [ ] Each H2 block is within the 350–650 word enrichment budget (excluding code).
-- [ ] A multi-block page is within 2,000 words of body text, and preferably within 1,800.
+- [ ] A multi-block page is within 2,400 words of body text, and preferably within the base page budget from `rsqkit-task-page`.
+- [ ] Added content follows the Readability and flow rules in `rsqkit-task-page`; the enriched text is no denser than the draft it started from.
 - [ ] Bullet budgets and anatomy from `rsqkit-task-page` still hold.
 - [ ] The redundancy rule from `rsqkit-task-page` holds: within a block each fact or rationale appears once, and nothing is repeated in three or more blocks.
 - [ ] Every item in the concept inventory is still present, including any added in this pass.

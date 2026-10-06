@@ -21,7 +21,7 @@ Every RSQKit task page must satisfy these quality criteria:
 4. **Appropriate depth** — Provide a conceptual overview and practical guidance. If a topic is well-covered by high-quality external material, point to it rather than duplicating it.
 5. **Motivation to learn more** — Link out to high-quality external documentation, standards, training materials, or community guidance.
 6. **Correct overall impression** — A reader leaving the page without following any links should have an accurate mental model of the task and how to approach it.
-7. **Concision** — The page should be the shortest version that keeps every distinct insight and leaves a correct impression. Cut repeated explanation and padding, not ideas. When in doubt about an insight, keep it and shorten the words around it; when in doubt about detail, link to it.
+7. **Concision and readability** — The page should be as short as it can be while still reading easily on first reading. Cut repeated explanation and padding, but never the words that connect one sentence to the next. Readability comes before coverage: if a block cannot keep every point and still read easily within its budget, link to the less important points or leave them out, and do not compress the text to make them fit. When in doubt about detail, link to it.
 8. **Research-specific content** — Each page states what is different about the task for research software, where anything is (for example numerical correctness, data-dependent behaviour, scale and HPC, or recording the environment for reproducibility). This content is never removed in the compression pass.
 
 ---
@@ -55,9 +55,47 @@ Examples:
 Aim for an average sentence length of about 10–15 words across the body.
 Flag any sentence over 25 words and split it unless splitting loses the connection between its parts.
 
-Short sentences written one after another as a paragraph read as staccato.
-When a paragraph becomes a run of short, related statements, turn it into bullets, one idea per bullet.
+Short sentences written one after another without links between them read as staccato.
+Fix this by joining related statements with connecting words (see Readability and flow), or, where they are genuinely separate points, by turning them into bullets, one idea per bullet.
 Keep Descriptions as prose.
+
+The average sentence length is a guide, not the main test of readability.
+A short sentence can still be hard to read if it packs in a list, an example and a qualification.
+
+### Readability and flow
+
+The page should read as a short explanation from a colleague, not as a list of compressed facts.
+A reader new to the topic should be able to follow each bullet on first reading.
+
+- Each sentence makes one point.
+  Do not put a list of more than three items, an example, and a qualification into the same sentence.
+  If a sentence needs all of these, split it, or move the list or example into the next sentence.
+
+- Keep the words that show how one sentence follows from another, such as "because", "so", "this means", "for example" and "as a result".
+  Do not remove them to save words.
+
+- Write whole sentences with their normal grammar.
+  Do not drop articles, verbs or linking words to shorten a sentence ("so results map to source lines" instead of "so that the results can be mapped to source lines").
+
+- Introduce a point before giving its detail.
+  Say what the reader needs to know and why, then give the tool, command or figure.
+
+- A higher word limit is room to explain the existing points more clearly.
+  It is not a reason to add more points.
+
+Example of dense text and the same content written to flow:
+
+```
+✗ - The environment shapes what you observe.
+    Hardware, operating system, compiler, libraries and system load can all change behaviour, including numerical results.
+    Record the environment for any observation you rely on.
+
+✓ - What you observe depends on where the program runs.
+    A different compiler, library version or processor can change how the program behaves, and in research software this can include its numerical results.
+    Record these details for any observation you rely on, so that you or others can repeat it later.
+```
+
+The second version is longer, but each sentence makes one point and the reader can see how the sentences connect.
 
 ---
 
@@ -127,6 +165,8 @@ Keep the list short, usually 6–15 items.
 
 After the compression pass, check that every item is still present on the page.
 If one has gone, restore it.
+If an item cannot fit without making the block dense, do not compress the text to keep it.
+Link to it or leave it out, and tell the user which item was dropped and why.
 
 Show the inventory to the user with the draft, as a short list after the page.
 
@@ -138,7 +178,9 @@ RSQKit task pages use a repeating structure. Each task or sub-task substantial e
 
 **When to split into sub-tasks:** split the page into separate H2 blocks when readers would arrive with different questions and each question needs its own evidence, trade-offs and actions. A topic covered by one question stays as one block. A thin sub-task should be merged into a neighbouring block.
 
-**Page budget:** each H2 block stays within 250–475 words (excluding code). A single-block page is therefore at most 475 words. A multi-block page has a ceiling of 1,800 words of body text (excluding code, Further Reading and AI Disclosure) and normally no more than 6 blocks. If a page needs more, consider whether part of it belongs on a separate RSQKit page. The `scripts/readability.py` script reports the body word count.
+**Page budget:** each H2 block stays within 250–475 words (excluding code). A single-block page is therefore at most 475 words. A multi-block page should stay within 2,000 words of body text (excluding code, Further Reading and AI Disclosure), may go up to 2,200 words, must never exceed 2,200, and normally has no more than 6 blocks. If a page needs more, consider whether part of it belongs on a separate RSQKit page. The `scripts/readability.py` script reports the body word count.
+
+These budgets are limits, not targets. A page that reads well at 1,500 words should stay at 1,500. When a page is over budget, cut repeated explanation, link to detail, or drop the least important points; do not make the text denser to fit.
 
 **Opening block on a multi-block page:** a multi-block page opens with a block that gives the reader the frame for the rest: what the practice is for, the questions it answers, and the limits that apply to every technique on the page. Later blocks assume this frame and do not repeat it. Its heading is still a "How do you…" question, framed around choosing or understanding the practice (e.g. *"## How do you decide which kind of dynamic analysis you need?"*). Do not use "What is X?" headings.
 
@@ -277,16 +319,18 @@ This work was produced with the assistance of Claude Sonnet 4.6, under the stric
 
 ## Compression Pass (mandatory)
 
-After completing a draft, make a second pass to remove duplicated explanation, aiming for a 20–25% cut in length without losing any insight:
+After completing a draft, make a second pass to remove repetition and padding.
+There is no target percentage: cut only what is repeated or adds nothing, and leave the rest.
 
 1. Merge bullets that make the same point.
 2. Apply the three-block rule from Redundancy: move points repeated in three or more blocks into the opening block.
 3. Remove words the heading already supplies (inside a fuzzing block, "finding no failures does not prove they are absent" does not need to name fuzzing).
 4. Strip signposting sentences ("The following considerations apply...", "In summary...", "It is important to note that...").
-5. Do not shorten the page by merging short sentences into long ones; keep the average sentence length within the range in Sentence length.
-6. Check each block and the page against the budgets in Page Format; if over, cut repeated explanation or move detail behind a link.
-7. Check the Concept Inventory and restore anything lost.
+5. Do not remove connecting words, drop normal grammar, or merge sentences to save words; the rules in Readability and flow still hold after this pass.
+6. Check each block and the page against the budgets in Page Format; if over, cut repeated explanation, move detail behind a link, or drop the least important points, and tell the user what was dropped.
+7. Check the Concept Inventory and restore anything lost, unless it was dropped under step 6.
 8. Check for absolute rules or rankings that compression introduced ("on every pull request", "the highest-value check") and soften them unless a source supports them.
+9. Read each block as someone new to the topic would. If a bullet needs a second reading to follow, rewrite it to flow, even if this makes it longer.
 
 Only present the post-compression draft to the user.
 
@@ -334,6 +378,9 @@ Report these findings before checking format.
 - [ ] Solutions steps address the reader directly ("choose a tool", "start with...").
 - [ ] Tone is professional, direct, and approachable throughout — approachable does not mean casual, chatty, or padded.
 - [ ] Average sentence length is about 10–15 words; no sentence over 25 words without good reason.
+- [ ] Each sentence makes one point; no sentence packs in a list of more than three items, an example and a qualification.
+- [ ] Connecting words between sentences are kept, and sentences use normal grammar rather than shortened forms.
+- [ ] Each bullet can be followed on first reading by someone new to the topic.
 
 ### Task heading (H2)
 - [ ] Every H2 heading is a "How do you…" question, including the opening block.
@@ -370,10 +417,11 @@ Report these findings before checking format.
 - [ ] Bullets are within the anatomy limits: Considerations at most four sentences, Solutions at most three, most bullets two or three.
 - [ ] Bullet counts are within budget: 4–6 per section on a single-block page, 3–5 per section per block on a multi-block page.
 - [ ] Within a block, no fact or rationale appears more than once; nothing is repeated in three or more blocks.
-- [ ] Each H2 block is within 250–475 words (excluding code); a multi-block page is within 1,800 words of body text and normally no more than 6 blocks.
+- [ ] Each H2 block is within 250–475 words (excluding code); a multi-block page is within 2,000 words of body text (2,200 at most) and normally no more than 6 blocks.
+- [ ] Any extra word allowance was used to explain points more clearly, not to add more points.
 - [ ] No signposting or summary sentences.
 - [ ] The compression pass has been run before presenting the draft.
-- [ ] Every item in the Concept Inventory is present on the page.
+- [ ] Every item in the Concept Inventory is present on the page, or the user has been told which items were dropped to keep the page readable.
 - [ ] No absolute rules or rankings were introduced without a source.
 
 ### Overall quality
@@ -414,7 +462,9 @@ Report these findings before checking format.
 - **Unsupported adoption or consensus claims** — phrases like "the most widely used" or "the standard approach" need either a source or softer wording. Use "widely used" or "common practice" instead. These claims can become quietly false and undermine the page's credibility.
 - **Bloated bullets** — more than one idea in a bullet, or bullets beyond the anatomy limits (four sentences for Considerations, three for Solutions).
 - **Rationale repeated across sections** — within a block, the Description says why it matters and Considerations and Solutions must not say it again; a point repeated in three or more blocks belongs in the opening block.
-- **Skipping the compression pass** — first drafts are reliably 20–25% longer than they need to be; the pass is not optional.
+- **Skipping the compression pass** — first drafts usually repeat explanation and include signposting; the pass is not optional.
+- **Dense, telegraphic text** — sentences that pack in lists, examples and qualifications, or drop connecting words and normal grammar to save space. The reader has to work out how the points relate. Follow Readability and flow.
+- **Filling the allowance** — treating a higher word limit as a reason to add more points. Use extra room to explain existing points more clearly.
 - **Over-smoothing** — describing a concept as simpler than it is, or dropping an insight during compression. Check the Concept Inventory.
 - **Staccato paragraphs** — runs of short statements written as prose. Group them into bullets.
 - **Absolutes introduced by compression** — rules or rankings that a longer sentence would have qualified.
