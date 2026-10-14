@@ -1,6 +1,6 @@
 ---
-name: rsqkit-task-page-enrich
-description: Use this skill whenever the user wants to enrich an RSQKit task page draft with additional content from external sources — text, file attachments, web pages, or links found on those pages. Trigger when the user says things like "enrich this task page", "add content from this link", "pull in information from this attachment", "can you improve this draft using these resources?", "use this page to improve the task page", or similar. Also trigger when the user provides URLs, files, or pasted text and asks for them to be incorporated into an existing RSQKit draft. Always use this skill as an enrichment pass after rsqkit-task-page has produced a draft, or when enriching an existing task page.
+name: "rsqkit-task-page-enrich"
+description: Use this skill whenever the user wants to enrich an RSQKit task page draft with additional content from external sources — text, file attachments, web pages, or links found on those pages. Trigger when the user says things like "enrich this task page", "add content from this link", "pull in information from this attachment", "can you improve this draft using these resources?", "use this page to improve the task page", or similar. Also trigger when the user provides URLs, files, or pasted text and asks for them to be incorporated into an existing RSQKit draft, or asks to merge or combine two versions of the same RSQKit page ("merge my version with this one", "combine the best of both drafts"). Always use this skill as an enrichment pass after rsqkit-task-page has produced a draft, or when enriching an existing task page.
 ---
 
 # RSQKit Task Page Enrichment Skill
@@ -38,6 +38,7 @@ Do not copy those rules or their numbers into this skill; refer to `rsqkit-task-
 This wider budget exists only because enrichment adds source-backed material; it applies only to enrichment passes and does not change the base budget for plain drafting.
 It is a ceiling, not a target — if the enriched block fits in 350 words, do not grow it to 650.
 Use any extra room to explain points more clearly, not to add more points or to pack more into each sentence.
+A short block kept under Page Plan step 3 in `rsqkit-task-page` stays under 300 words when enriched; if the sources would make it longer, link to them instead.
 
 **Page ceiling for multi-block pages:** try to keep the enriched page within the base page budget from `rsqkit-task-page`.
 Going above it, up to 2,400 words of body text, is allowed but best avoided.
@@ -57,6 +58,45 @@ It may add a new H2 block only if all of these hold:
 - The user confirms before the block is written.
 
 When proposing a block, give its "How do you…" heading, one sentence on what it would cover, and its estimated length, then wait for the user's answer.
+
+---
+
+## Merging Two Drafts
+
+Sometimes the source material is a second draft of the same page, written by another person or with another tool.
+Merging two drafts is an enrichment pass with extra steps, because the two drafts usually have different strengths: one may be the better conceptual introduction and the other the better practical guide.
+
+1. **Compare before merging.**
+   For each draft, note what it does better, using the section jobs in `rsqkit-task-page` ("What each section is for").
+   Check which draft has the clearer Descriptions, which has more concrete Solutions, which covers more of the reader situations and settings in Page Plan steps 1 and 2 of `rsqkit-task-page`, and which has headings phrased around the reader's goal.
+   Also ask the Practitioner check questions from `rsqkit-task-page` of both drafts, and note which draft answers each one better.
+   Show this comparison to the user if they have not already seen one.
+
+2. **Choose which draft leads for each part.**
+   Take the block structure and headings from one draft.
+   For each section type, take the lead text from the draft that does that job better.
+   A common result is the Descriptions and the opening and workflow blocks from one draft, and the Solutions from the other.
+
+3. **Merge Considerations by idea, not by sentence.**
+   List the distinct points in both drafts' Considerations, combine points that say the same thing, and write each combined point once in the leading text's style.
+
+4. **Remove repetition across blocks.**
+   Two drafts often repeat the same practical advice in several blocks, and merging doubles it.
+   Apply the redundancy rule in `rsqkit-task-page`: limits go once in the opening block, and routine practice once in the workflow block.
+
+5. **Check against live RSQKit pages and the budget.**
+   Apply Page Plan steps 3 and 5 in `rsqkit-task-page` to the merged structure.
+   If a block is mostly covered by an existing RSQKit page, follow Page Plan step 3: drop it and point to that page, or keep a short treatment if readers of this page would expect the topic here.
+   If the merged page is over the ceiling in Concision Constraints above, drop the least important points rather than compressing the text.
+
+6. **Report what was dropped.**
+   List for the user every point from either draft that is not on the merged page, with the reason, so that they can restore any they want.
+
+When the user has asked for a merge, the block structure of the leading draft counts as confirmed for the Adding a Block rule.
+Still tell the user about any block that was dropped or added compared with either draft.
+
+Fix format faults from either draft as part of the merge, such as invalid metadata indentation, "What is X?" headings, prose Solutions, or internal links that end in `.md`, and mention them in the report.
+Merge the AI Disclosure stages from both drafts in order, and add a stage for the merge itself.
 
 ---
 
@@ -108,7 +148,7 @@ From all gathered material, identify:
 - Actionable steps, tools, methods, or approaches for the Solutions section.
 - High-quality resources worth linking to directly.
 
-Compare the source material with the page's concept inventory (from `rsqkit-task-page`; if the draft has none, build one from the draft first).
+Compare the source material with the page's concept inventory (from `rsqkit-task-page`; if the draft has none, build one from the draft first, including the Practitioner check).
 List any insight in the sources that the page lacks, and propose adding it to the inventory.
 Show the user the proposed additions.
 
@@ -122,6 +162,8 @@ Discard:
 Rewrite the draft sections where enrichment adds value. For each change:
 
 - Prefer precision, but not at the cost of readability. Follow the Readability and flow rules in `rsqkit-task-page`: one point per sentence, connecting words kept, normal grammar. Do not make a sentence more precise by packing more into it, and keep the average sentence length within the range set in `rsqkit-task-page`.
+- Put each addition in the section whose job it fits, following "What each section is for" in `rsqkit-task-page`: concepts and definitions in the Description, judgement and limits in Considerations, tools and commands in Solutions.
+- Keep Descriptions in short paragraphs of one to three sentences, one idea per paragraph, as `rsqkit-task-page` requires. When you add a sentence to a Description, put it in the paragraph whose idea it belongs to, or start a new short paragraph.
 - Add links in the Solutions section (or Considerations where appropriate) using the format: `[Link text](URL)`.
 - Do not pad sections just because source material exists — only add what genuinely improves the page.
 - Apply the Concision Constraints above: the bullet budgets, bullet anatomy, redundancy rule and sentence-length guidance from `rsqkit-task-page` hold, each block stays within the 350–650 word enrichment budget, and the page stays within its ceiling.
@@ -143,7 +185,8 @@ After integrating sources, verify the page still meets the RSQKit core principle
 
 - [ ] Reader can still form a correct understanding without following any links.
 - [ ] No section has become bloated with content better left to external resources.
-- [ ] Each H2 block is within the 350–650 word enrichment budget (excluding code).
+- [ ] Each H2 block is within the 350–650 word enrichment budget (excluding code), and any short block is under 300 words.
+- [ ] Descriptions are in short paragraphs of one to three sentences, one idea per paragraph.
 - [ ] A multi-block page is within 2,400 words of body text, and preferably within the base page budget from `rsqkit-task-page`.
 - [ ] Added content follows the Readability and flow rules in `rsqkit-task-page`; the enriched text is no denser than the draft it started from.
 - [ ] Bullet budgets and anatomy from `rsqkit-task-page` still hold.
@@ -155,6 +198,8 @@ After integrating sources, verify the page still meets the RSQKit core principle
 - [ ] All added links point to high-quality, relevant, stable external material.
 - [ ] Content is factually accurate — sources have been interpreted correctly.
 - [ ] Each block keeps the Description → Considerations → Solutions structure.
+- [ ] Each section still does its own job: Descriptions explain ideas without tool names or commands, Considerations stay tool-neutral where possible, and every tool in Solutions has a command or first step.
+- [ ] If two drafts were merged, the user has been told every point and block that was dropped from either draft.
 - [ ] Prose is one sentence per line; no existing one-sentence-per-line content was reflowed into wrapped paragraphs.
 - [ ] Added content doesn't contradict existing good content in the draft.
 
@@ -165,6 +210,7 @@ After integrating sources, verify the page still meets the RSQKit core principle
 | In scope | Out of scope |
 |---|---|
 | Pasted text provided by the user | Content from links on pages linked by the fetched pages (2+ levels deep) |
+| A second draft of the same page, to be merged (see Merging Two Drafts) | Merging pages on different topics into one page |
 | Attached files (PDF, doc, md, etc.) | Fabricating content not in the sources |
 | URLs provided by the user | Changing the RSQKit page format (adding a block is allowed only as described in Adding a Block) |
 | Links found on fetched pages (1 level deep, relevant only) | Reproducing external content verbatim at length |
